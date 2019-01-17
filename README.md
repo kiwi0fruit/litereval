@@ -1,11 +1,7 @@
 # litereval
 
 `litereval` is wrapper around `ast.literal_eval` with new additional `{foo='bar', key=None}` `dict` syntax.
-Plus some helper tools to merge dictionaries, parse `ast.literal_eval` python data to `*args` and `**kwargs`.
-
-* `merge`: Deep merge two dictionaries.
-* 
-* `get_args_kwargs`: Read `*args` and `*kwargs` from `dict` by key.
+Plus some helper tools to deep merge dictionaries, parse `ast.literal_eval` python data to `*args` and `**kwargs`.
 
 
 # API
