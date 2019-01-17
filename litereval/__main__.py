@@ -94,7 +94,7 @@ def get_args_kwargs(name: str, args: dict, default=None) -> Tuple[
     Reads *args and **kwars for function/method from a dict by ``name`` key.
 
     * ``(1, 2)`` -> ``[1, 2], {}``
-    * ``"foo"`` -> ``["foo"]``
+    * ``"foo"`` -> ``["foo"], {}``
     * ``{(): ('a', 0), 'foo': None} ->
       ``['a', 0], {'foo': None}``
 
