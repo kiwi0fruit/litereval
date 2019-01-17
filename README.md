@@ -1,6 +1,6 @@
 # litereval
 
-Wrapper around `ast.literal_eval` with new additional `{foo='bar', key=None}` dict syntax.
+Wrapper around `ast.literal_eval` with new additional `{foo='bar', key=None}` dict syntax. + Deep merge two dictionaries.
 
 
 # API
