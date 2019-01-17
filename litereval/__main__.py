@@ -34,6 +34,11 @@ def litereval(string: str):
 
     >>> assert repr(_obj) == repr(litereval(_str))
     """
+    try:
+        return ast.literal_eval(string)
+    except SyntaxError:
+        pass
+
     input_charset = set(list(string))
     reps = []
 
