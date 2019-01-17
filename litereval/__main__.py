@@ -83,3 +83,8 @@ def merge(source: dict, destination: dict,
             destination[key] = (deepcopy(val) if copy else val)
 
     return destination
+
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
