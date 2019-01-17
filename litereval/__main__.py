@@ -2,15 +2,19 @@ import sys
 import ast
 from copy import deepcopy
 import re
-from typing import Union, Tuple
+from typing import Union, Tuple, Any
 
 
-obj = {'gg': '676', None: 0, (): (1, 2, 3), 'a': """{-1: "123", foo='bar'}
+class LiterEvalError(Exception):
+    pass
+
+
+_obj = {'gg': '676', None: 0, (): (1, 2, 3), 'a': """{-1: "123", foo='bar'}
 """,
  'x': [1, 2, {'foo': 33, 'bar': '{x=1, y=2, \
 z=3}'}]}  # noqa
 
-str_ = """\
+_str = """\
 {gg='676', None: 0, (): (1, 2, 3), a=\"\"\"{-1: "123", foo='bar'}
 \"\"\",
  x=[1, 2, {foo=33, bar='{x=1, y=2, \\
@@ -23,7 +27,12 @@ def litereval(string: str):
     Small extension of ``ast.literal_eval`` that also
     accepts dict in a form of ``{key=100, foo='bar'}``
 
-    >>> assert repr(obj) == repr(litereval(str_))
+    Returns
+    -------
+    ret :
+        ast.literal_eval(preprocess(string))
+
+    >>> assert repr(_obj) == repr(litereval(_str))
     """
     input_charset = set(list(string))
     reps = []
@@ -35,7 +44,7 @@ def litereval(string: str):
                 break
 
     reps = {'\\': reps[0], '"': reps[1], "'": reps[2]}  # language=PythonRegExp
-    no_esc = r"(^|(?<=[^\\]))"
+    no_esc = r"(?:^|(?<=[^\\]))"
     string = re.sub(
         rf"{no_esc}\\[\\'\"]",
         lambda m: reps[m.group(0)[1:]],
@@ -60,8 +69,13 @@ def merge(source: dict, destination: dict,
           copy: bool = False) -> dict:
     """
     Deep merge two dictionaries.
-    Overwrites in case of conflics.
+    Overwrites in case of conflicts.
     From https://stackoverflow.com/a/20666342
+
+    Returns
+    -------
+    ret :
+        ...
 
     >>> dst = {'first': {'inn': {'foo': 'dog', 'n': 1}}}
     >>> repr_dst = repr(dst)
@@ -87,57 +101,80 @@ def merge(source: dict, destination: dict,
     return destination
 
 
-def get_args_kwargs(name: str, args: dict, default=None) -> Tuple[
-    Union[list, None], Union[dict, None]
+def tuple_(obj: Any) -> tuple:
+    """Converts any object to tuple. ``string`` to ``(string,)``."""
+    if isinstance(obj, str):
+        return obj,
+    try:
+        return tuple(obj)
+    except TypeError:
+        return obj,
+
+
+def validated(args: tuple, kwargs: dict) -> Tuple[tuple, dict]:
+    """Validates inputs and returns ``*args, **kwargs``."""
+    def ret(*args_, **kwargs_):
+        return args_, kwargs_
+    try:
+        return ret(*args, **kwargs)
+    except TypeError as e:
+        raise LiterEvalError(e)
+
+
+def get(key: str, dic, default=None):
+    """Gets key even from not a dictionary."""
+    try:
+        return dict(dic).get(key, default)
+    except TypeError:
+        return default
+
+
+def args_kwargs(args: Any) -> Tuple[
+    Union[tuple, None], Union[dict, None]
 ]:
     """
-    Reads *args and **kwars for function/method from a dict by ``name`` key.
+    Parses ``args`` object to ``(*args, **kwargs)`` tuple.
+    Special case when ``args`` is ``None``: returns ``(None, None)``.
+    Otherwise tries to put not iterable object to tuple:
+    ``args`` to ``(args,)``. Examples:
 
-    * ``(1, 2)`` -> ``[1, 2], {}``
-    * ``"foo"`` -> ``["foo"], {}``
-    * ``{(): ('a', 0), 'foo': None} ->
-      ``['a', 0], {'foo': None}``
-
-    >>> dic = litereval("{func={(): (1, 2), foo=True, bar=100}, foo={(): 'bar'}}")
-    >>> func = ([1, 2], {'foo': True, 'bar': 100})
-    >>> foo = (['bar'], {})
-    >>> assert repr(func) == repr(get_args_kwargs('func', dic))
-    >>> assert repr(foo) == repr(get_args_kwargs('foo', dic))
-    >>> assert repr(([], {})) == repr(get_args_kwargs('bar', dic, {}))
-    >>> assert repr((None, None)) == repr(get_args_kwargs('bar', dic))
-
-    Parameters
-    ----------
-    name :
-        function/method name
-    args :
-        dict with function/method names as first level keys
-    default :
-        default fallback value to extract from args
+    * ``(1, 2)`` to ``(1, 2), {}``
+    * ``"foo"`` to ``("foo",), {}``
+    * ``{(): ('a', 0), 'foo': None} to
+      ``('a', 0), {'foo': None}``
 
     Returns
     -------
     ret :
         tuple: *args, **kwargs
+
+    >>> dic = litereval("{func={(): (1, 2), foo=True, bar=100}, foo={(): 'bar'}}")
+    >>> args_kwargs(get('func', dic))
+    ((1, 2), {'foo': True, 'bar': 100})
+    >>> args_kwargs(get('foo', dic))
+    (('bar',), {})
+    >>> args_kwargs(get('bar', dic, {}))
+    ((), {})
+    >>> args_kwargs(get('bar', dic))
+    (None, None)
+    >>> args_kwargs(get('bar', [1, 2]))
+    (None, None)
+    >>> from collections import OrderedDict
+    >>> args_kwargs(get('bar', OrderedDict([('bar', {'key': 'val'}),])))
+    ((), {'key': 'val'})
+    >>> args_kwargs(get('foo', {'foo': {0: 0, 1: 1}}))
+    Traceback (most recent call last):
+    LiterEvalError: ret() keywords must be strings
     """
-    name = args.get(name, default) if isinstance(name, dict) else default
-
-    def list_(args_) -> list:
-        if isinstance(args_, str):
-            return [args_]
-        try:
-            return list(args_)
-        except TypeError:
-            return [args_]
-
-    if name is None:
+    if args is None:
         return None, None
-    elif isinstance(name, dict):
-        _args = name.get((), [])
-        name.pop((), None)
-        return list_(_args), name
-    else:
-        return list_(name), {}
+    try:
+        dic = dict(args)
+        args_ = dic.get((), ())
+        dic.pop((), None)
+        return validated(tuple_(args_), dic)
+    except TypeError:
+        return validated(tuple_(args), {})
 
 
 if __name__ == "__main__":
