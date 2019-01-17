@@ -55,7 +55,7 @@ def litereval(string: str):
 
 
 def merge(source: dict, destination: dict,
-          copy: bool = False):
+          copy: bool = False) -> dict:
     """
     Deep merge two dictionaries.
     Overwrites in case of conflics.
