@@ -120,7 +120,7 @@ def get_args_kwargs(name: str, args: dict, default=None) -> Tuple[
     ret :
         tuple: *args, **kwargs
     """
-    name = args.get(name, default)
+    name = args.get(name, default) if isinstance(name, dict) else default
 
     def list_(args_) -> list:
         if isinstance(args_, str):
