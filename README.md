@@ -3,6 +3,8 @@
 `litereval` is wrapper around `ast.literal_eval` with new additional `{foo='bar', key=None}` `dict` syntax.
 Plus some helper tools to deep merge dictionaries, parse `ast.literal_eval` python data to `*args` and `**kwargs`.
 
+Can be used to create wrapper command line interfaces. See [pyppdf](https://github.com/kiwi0fruit/pyppdf).
+
 
 # API
 
