@@ -65,6 +65,19 @@ args_kwargs
            tuple: *args, **kwargs
        """
 
+get_args
+~~~~~~~~
+
+.. code:: py
+
+   def get_args(name: str, args, default=None) -> Args:
+       """
+       Gets ``*args`` and ``**kwargs`` for a ``name`` function
+       from an ``args`` dict. Wrapper around ``args_kwargs`` function.
+
+       Returns ``NamedTuple`` ``Args``: ``(args: tuple, kwargs: dict)``
+       """
+
 get
 ~~~
 

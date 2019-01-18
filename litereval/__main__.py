@@ -2,7 +2,7 @@ import sys
 import ast
 from copy import deepcopy
 import re
-from typing import Union, Tuple, Any
+from typing import Union, Tuple, Any, NamedTuple
 
 
 class LiterEvalError(Exception):
@@ -20,6 +20,12 @@ _str = """\
  x=[1, 2, {foo=33, bar='{x=1, y=2, \\
 z=3}'}]}\
 """
+
+
+class Args(NamedTuple):
+    """args: tuple, kwargs: dict"""
+    args: Union[tuple, None]
+    kwargs: Union[dict, None]
 
 
 def litereval(string: str):
@@ -180,6 +186,16 @@ def args_kwargs(args: Any) -> Tuple[
         return validated(tuple_(args_), dic)
     except TypeError:
         return validated(tuple_(args), {})
+
+
+def get_args(name: str, args, default=None) -> Args:
+    """
+    Gets ``*args`` and ``**kwargs`` for a ``name`` function
+    from an ``args`` dict. Wrapper around ``args_kwargs`` function.
+
+    Returns ``NamedTuple`` ``Args``: ``(args: tuple, kwargs: dict)``
+    """
+    return Args(*args_kwargs(get(name, args, default)))
 
 
 if __name__ == "__main__":

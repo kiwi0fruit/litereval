@@ -3,6 +3,6 @@ __version__ = get_versions()['version']
 del get_versions
 
 from .__main__ import (
-    litereval, merge, args_kwargs,
+    litereval, merge, args_kwargs, get_args,
     LiterEvalError, tuple_, validated, get
 )
