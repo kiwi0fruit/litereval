@@ -6,6 +6,18 @@ litereval
 deep merge dictionaries, parse ``ast.literal_eval`` python data to
 ``*args`` and ``**kwargs``.
 
+Can be used to create wrapper command line interfaces. See
+`pyppdf <https://github.com/kiwi0fruit/pyppdf>`__.
+
+Install
+=======
+
+Needs python 3.6+
+
+.. code:: bash
+
+   pip install litereval
+
 API
 ===
 

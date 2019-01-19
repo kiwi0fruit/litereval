@@ -6,6 +6,15 @@ Plus some helper tools to deep merge dictionaries, parse `ast.literal_eval` pyth
 Can be used to create wrapper command line interfaces. See [pyppdf](https://github.com/kiwi0fruit/pyppdf).
 
 
+# Install
+
+Needs python 3.6+
+
+```bash
+pip install litereval
+```
+
+
 # API
 
 ### litereval
