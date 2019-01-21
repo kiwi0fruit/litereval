@@ -11,7 +11,7 @@ Can be used to create wrapper command line interfaces. See [pyppdf](https://gith
 Needs python 3.6+
 
 ```bash
-conda install litereval
+conda install -c defaults -c conda-forge litereval
 ```
 
 or
