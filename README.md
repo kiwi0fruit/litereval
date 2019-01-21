@@ -11,6 +11,12 @@ Can be used to create wrapper command line interfaces. See [pyppdf](https://gith
 Needs python 3.6+
 
 ```bash
+conda install litereval
+```
+
+or
+
+```bash
 pip install litereval
 ```
 
